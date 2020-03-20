@@ -1,3 +1,5 @@
+![2245 Sound Level Meter](2245.jpg)
+
 # Open-Interface-for-Sound-Level-Meter
 
 
