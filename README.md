@@ -11,5 +11,5 @@ Programming examples are provided as Python and C#/.Net.
 
 Without the license installed on the SLM it will still be possible to access a limited set of parameters. Accessing the full functionality of the SLM requires a license to be installed on to the SLM; a license which is linked to the serial number of the SLM.
 
-Please consult the ‘Documentation’ folder for information and how to get started.
+Please consult the [Documentation](Documentation) folder for information and how to get started.
 
