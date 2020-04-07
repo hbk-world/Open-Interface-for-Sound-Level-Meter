@@ -1,5 +1,6 @@
 import asyncio
 import socket
+import requests
 # Modules to convert webxi data
 import webxi.webxi_header as webxiHead
 import webxi.webxi_stream as webxiStream
@@ -35,6 +36,11 @@ def print_LAeq_mov(message, data_type, leq_mov):
         print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s:" + "%.1f" % LAeq_mov_value)
 
 async def main():
+    # Enable logging mode
+    requests.put(host + "/webxi/Applications/SLM/Setup/ControlLoggingMode", json=1)
+    # Enable LAeq mode on the device
+    requests.put(host + "/webxi/applications/slm/setup/BBLAeq", json=True)
+
     # Get ID and object of sequence, the data for the wanted logging mode
     ID, sequence = seq.get_sequence(host,sequenceId) 
 
