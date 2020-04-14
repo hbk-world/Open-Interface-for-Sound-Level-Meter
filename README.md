@@ -13,3 +13,4 @@ Without the license installed on the SLM it will still be possible to access a l
 
 Please consult the [Documentation](Documentation) folder for information and how to get started.
 
+###### *Note: We have seen problems when accessing GitHub using Internet Explorer; MS Edge, Chrome and Firefox has not shown any problems.*
