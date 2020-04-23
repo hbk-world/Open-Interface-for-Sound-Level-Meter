@@ -16,8 +16,8 @@ Binary WebXi data streams are documented as part of the WebXi Protocol Specifica
 The Kaitai files may compiled into parsers to be used from within various programming languages (C#, Java, Python, …).
 
 To generate parsers for Python use:
-*ksc webxi-stream.ksy -t python
-*ksc webxi-header.ksy -t python
+* ksc webxi-stream.ksy -t python
+* ksc webxi-header.ksy -t python
 
 This creates 2 python files, one for parsing the data header and one for parsing the rest of the binary stream.
 
