@@ -11,7 +11,7 @@ Which data sources to stream from the SLM (sound data, status, events, etc.) are
 
 Data leaving the SLM via the WebXi streams are time stamped from the same clock source.
 
-Binary WebXi data streams are documented as part of the '*WebXi protocol specification*', found in the [Documentation](../../blob/master/Documentation) folder. Based on this documentation the WebXi streaming format has been described using **Kaitai**.
+Binary WebXi data streams are documented as part of the '*WebXi protocol specification*', found in the [Documentation](../../Documentation) folder. Based on this documentation the WebXi streaming format has been described using **Kaitai**.
 
 The Kaitai(.kty) files may compiled into parsers to be used from within various programming languages (C#, Java, Python, …).
 
