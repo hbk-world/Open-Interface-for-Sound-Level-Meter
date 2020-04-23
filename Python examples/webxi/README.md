@@ -1,7 +1,7 @@
 
 
-# WebXi binary data streaminig
-#### *How to*
+# WebXi binary data streaming
+#### *Introduction*
 
 Aside from communicating with the SLM via HTTP/REST/JSON, the sound level meter (SLM) also offers WebXi data streams via WebSockets. A faster and more efficient way to stream continuous binary data with a minimized overhead.
 
