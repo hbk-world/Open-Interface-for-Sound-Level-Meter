@@ -9,7 +9,7 @@ WebXi streams are setup on the SLM using JSON and REST. Once the WebXi streams h
 
 Which data sources to stream from the SLM (sound data, status, events, etc.) are selected by the client during setup using REST and JSON.
 
-Data leaving the SLM via the WebXi streams are all time stamped from the same clock source.
+Data leaving the SLM via the WebXi streams are time stamped from the same clock source.
 
 Binary WebXi data streams are documented as part of the '*WebXi protocol specification*', found in the [Documentation](Documentation) folder. Based on this documentation the WebXi streaming format has been described using **Kaitai**.
 
