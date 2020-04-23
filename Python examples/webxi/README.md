@@ -13,7 +13,7 @@ Data leaving the SLM via the WebXi streams are all time stamped from the same cl
 
 Binary WebXi data streams are documented as part of the '*WebXi protocol specification*', found in the [Documentation](Documentation) folder. Based on this documentation the WebXi streaming format has been described using **Kaitai**.
 
-The Kaitai files may compiled into parsers to be used from within various programming languages (C#, Java, Python, …).
+The Kaitai(.kty) files may compiled into parsers to be used from within various programming languages (C#, Java, Python, …).
 
 To generate parsers for Python use:
 * ksc webxi-stream.ksy -t python
