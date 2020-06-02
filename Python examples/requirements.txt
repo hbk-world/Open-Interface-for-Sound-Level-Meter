@@ -2,3 +2,5 @@ requests
 numpy
 websockets
 -e git+https://github.com/kaitai-io/kaitai_struct_python_runtime#egg=kaitaistruct
+matplotlib
+drawnow

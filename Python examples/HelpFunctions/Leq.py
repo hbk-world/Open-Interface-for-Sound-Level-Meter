@@ -7,11 +7,15 @@ class MovingLeq:
        Calling move(new_interval) on the object will overwrite the oldest value in the       
        window, recalculate the total Leq and return it."""
 
-    def __init__(self, window_length_sec):
+    def __init__(self, window_length_sec,storedata=False):
         self.window_length = window_length_sec
 
         # Intialize an empty array, index to track oldest value, and window status
         self.leq_window = np.zeros(window_length_sec)
+        self.storedata = storedata
+        if self.storedata:
+            self.rawData = LeqData(101) # Used to store the raw data for plotting
+            self.leqData = LeqData(101) # Used to store the Leq data for plotting
         self.oldest_value_index = 0
         self.leq_total = 0.0
         self.window_full = False
@@ -32,15 +36,35 @@ class MovingLeq:
         if self.window_full:            
             self.leq_total = self.total_leq(self.leq_window)
             self.oldest_value_index = self.oldest_value_index % self.window_length
+            if self.storedata:
+                self.leqData.move(self.leq_total)
+                self.rawData.move(new_value)
             return self.leq_total
 
         # If the moving window is not full of measured data, simply calculate total Leq
         # for the data that is in the window (and ignore the empty part of the array)
         else:
             self.leq_total = self.total_leq(self.leq_window[:self.oldest_value_index])
-
-            #self.leq_total = 10 * math.log((sum(pow(10,(self.leq_window[:self.oldest_value_index]/10)))/self.oldest_value_index),10)
             self.oldest_value_index = self.oldest_value_index % self.window_length
             if self.oldest_value_index == self.window_length - 1:
                 self.window_full = True
+            if self.storedata:
+                self.leqData.move(self.leq_total)
+                self.rawData.move(new_value)
             return self.leq_total
+
+    def getPlotData(self,Leq):
+        if Leq:
+            return self.leqData.getData()
+        else:
+            return self.rawData.getData()
+
+class LeqData:
+    def __init__(self,window_length_sec):
+        self.leq_window = np.zeros(window_length_sec)
+
+    def move(self, new_value):
+        self.leq_window = np.insert(self.leq_window[1:], self.leq_window.size-1,new_value)
+
+    def getData(self):
+        return self.leq_window
