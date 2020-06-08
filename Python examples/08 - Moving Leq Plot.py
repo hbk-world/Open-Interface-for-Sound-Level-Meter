@@ -58,6 +58,13 @@ def print_LAeq_mov(message, data_type, leq_mov):
 async def main():
     # Enable logging mode
     requests.put(host + "/webxi/Applications/SLM/Setup/ControlLoggingMode", json=1)
+    # Set the device in free runnign mode
+    requests.put(host + "/webxi/Applications/SLM/Setup/ControlMeasurementTimeControl", json=0)
+    # Enable A weight frequency broad band weighting, but first clear the other once to be sure
+    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightB", json=False)
+    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightC", json=False)
+    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightZ", json=False)
+    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightA", json=True)
     # Enable LAeq mode on the device
     requests.put(host + "/webxi/applications/slm/setup/BBLAeq", json=True)
 
