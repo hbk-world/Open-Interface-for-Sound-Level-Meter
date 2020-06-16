@@ -1,2 +1,7 @@
+# python
 */src
 *.pyc
+
+# c#
+bin/
+obj/
