@@ -31,11 +31,20 @@ namespace SLM
         }
 
 
-        public void Setup()
+        public void Setup_LaEQ()
         {
             // Enable logging mode
             this.WebXi("Applications/SLM/Setup").Put("", "{\"ControlLoggingMode\": 1}");
-            // Enable LAeq mode on the device
+
+            // Enable free running mode 
+            this.WebXi("Applications/SLM/Setup").Put("", "{\"ControlMeasurementTimeControl\": 0}");
+
+            // Enable A weighting on SLM and  clear the broadbands
+            this.WebXi("Applications/SLM/Setup").Put("", "{\"BBFreqWeightB\": false}");
+            this.WebXi("Applications/SLM/Setup").Put("", "{\"BBFreqWeightC\": false}");
+            this.WebXi("Applications/SLM/Setup").Put("", "{\"BBFreqWeightZ\": false}");
+
+            this.WebXi("Applications/SLM/Setup").Put("", "{\"BBFreqWeightA\": true}");
             this.WebXi("Applications/SLM/Setup").Put("", "{\"BBLAeq\": true}");
         }
 

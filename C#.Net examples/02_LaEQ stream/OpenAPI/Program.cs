@@ -13,7 +13,7 @@ namespace OpenAPI
             Client slm = new Client(address);
 
             // Setup of the SLM, certain modes is needed to perform the LAeq measuremet
-            slm.Setup();
+            slm.Setup_LaEQ();
 
             // The sequenceID of LAeq measurement
             string ID = "6";
