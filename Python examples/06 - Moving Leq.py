@@ -9,7 +9,7 @@ import webxi.webxi_stream as webxiStream
 import HelpFunctions.stream_handler as stream           # SLM stream functions
 import HelpFunctions.measurment_handler as meas         # Start/pause/Stop measurments functions
 import HelpFunctions.sequence_handler as seq            # Get sequences, e.g. LAeq functions
-from HelpFunctions.Leq import MovingLeq                 # Class to hold moving Leq 
+from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq # Class to hold moving Leq 
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
 
 
@@ -36,10 +36,8 @@ def print_LAeq_mov(message, data_type, leq_mov):
         print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s:" + "%.1f" % LAeq_mov_value)
 
 async def main():
-    # Enable logging mode
-    requests.put(host + "/webxi/Applications/SLM/Setup/ControlLoggingMode", json=1)
-    # Enable LAeq mode on the device
-    requests.put(host + "/webxi/applications/slm/setup/BBLAeq", json=True)
+    # Setup the SLM to run LAeq 
+    SLM_Setup_LAeq(host)
 
     # Get ID and object of sequence, the data for the wanted logging mode
     ID, sequence = seq.get_sequence(host,sequenceId) 

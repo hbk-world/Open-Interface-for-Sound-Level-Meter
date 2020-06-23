@@ -9,7 +9,7 @@ import webxi.webxi_stream as webxiStream
 import HelpFunctions.stream_handler as stream           # SLM stream functions
 import HelpFunctions.measurment_handler as meas         # Start/pause/Stop measurments functions
 import HelpFunctions.sequence_handler as seq            # Get sequences, e.g. LAeq functions
-from HelpFunctions.Leq import MovingLeq                 # Class to hold moving Leq 
+from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq # Class to hold moving Leq 
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
 import matplotlib.pyplot as plt
 from drawnow import * 
@@ -56,17 +56,8 @@ def print_LAeq_mov(message, data_type, leq_mov):
         print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s:" + "%.1f" % LAeq_mov_value)
 
 async def main():
-    # Enable logging mode
-    requests.put(host + "/webxi/Applications/SLM/Setup/ControlLoggingMode", json=1)
-    # Set the device in free runnign mode
-    requests.put(host + "/webxi/Applications/SLM/Setup/ControlMeasurementTimeControl", json=0)
-    # Enable A weight frequency broad band weighting, but first clear the other once to be sure
-    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightB", json=False)
-    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightC", json=False)
-    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightZ", json=False)
-    requests.put(host + "/webxi/Applications/SLM/Setup/BBFreqWeightA", json=True)
-    # Enable LAeq mode on the device
-    requests.put(host + "/webxi/applications/slm/setup/BBLAeq", json=True)
+    # Setup the SLM to run LAeq 
+    SLM_Setup_LAeq(host)
 
     # Get ID and object of sequence, the data for the wanted logging mode
     ID, sequence = seq.get_sequence(host,sequenceId) 
@@ -93,9 +84,6 @@ async def main():
 
     await task1
     await task2
-
-    # Initilize and run the websocket to retrive data
-    # await webSocket.next_async_websocket(uri,msg_func)
 
 if __name__ == "__main__":
     asyncio.run(main())
