@@ -2,7 +2,7 @@
 
 ## SLM Device Discovery using mDNS
 
-As mentioned in the [Documentation](Documentation), the SLM implements network discovery based on Multicast DNS (mDNS); part of the zero-configuration networking technologies: https://en.wikipedia.org/wiki/Zero-configuration_networking
+As mentioned in the [Documentation](../../Documentation), the SLM implements network discovery based on Multicast DNS (mDNS); part of the zero-configuration networking technologies: https://en.wikipedia.org/wiki/Zero-configuration_networking
 
 Each SLM presents itself as a *“_web-xi.tcp"* device
 
