@@ -22,7 +22,7 @@ import HelpFunctions.sequence_handler as seq            # Get sequences, e.g. LA
 from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq # Class to hold moving Leq 
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
 
-ip = "169.254.60.175"
+ip = "169.254.3.40"
 host = "http://" + ip
 sequenceID = 6
 
@@ -35,7 +35,7 @@ class streamHandler:
             self.startStream()
         print("streamHandler")
 
-    def print_LAeq_mov(self, message, data_type, leq_mov):
+    def print_LAeq_mov(self, message, data_type, leq_mov, fut):
         """This is the function handling the data from the BK2245\n
         This function prints the data to the terminal in the format:\n
         "LAeq: Inst_Val | LAeq,mov,10s: AVG_Val"""
@@ -48,8 +48,9 @@ class streamHandler:
             print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s: " + "%.1f" % LAeq_mov_value)
             
         if not self.StreamRun:
-            loop = asyncio.get_event_loop()
-            loop.stop()
+            # loop = asyncio.get_event_loop()
+            # loop.stop()
+            fut.set_result(True)
 
     def streamInit(self):
         SLM_Setup_LAeq(host)
@@ -61,21 +62,21 @@ class streamHandler:
         self.uri = stream.setup_stream(host,ip,self.ID,"Test")  
 
         # Start a measurement. This is needed to obtain data from the device
-        meas.start_pause_measurement(host,True)
-
-        # Create lambda function to use for the stream message. In this example is a function
-        # call used
-        self.msg_func = lambda msg : self.print_LAeq_mov(msg, self.data_type, leq_10_mov)        
+        meas.start_pause_measurement(host,True)               
 
     def startStream(self):
         self.StreamRun = True
         asyncio.run(self.runStream())
-        loop = asyncio.get_event_loop()
-        loop.close()
 
     async def runStream(self):
+        loop = asyncio.get_running_loop()
+        fut = loop.create_future()
+        # Create lambda function to use for the stream message. In this example is a function
+        # call used
+        self.msg_func = lambda msg : self.print_LAeq_mov(msg, self.data_type, leq_10_mov, fut) 
         # Initilize and run the websocket to retrive data
-        await webSocket.next_async_websocket(self.uri, self.msg_func)  
+        loop.create_task(webSocket.next_async_websocket(self.uri, self.msg_func))
+        await fut
 
     def stopStream(self):
         self.StreamRun = False  
@@ -90,11 +91,15 @@ class FigHandler:
         self.ln2, = self.ax[1].plot(axis,dataHandler.getPlotData(False))
         self.ax[1].set_xlim(left=np.min(axis), right=np.max(axis))
         self.ax[1].set_ylim(bottom=30, top=100)
+        self.ax[0].set_ylabel("dB [SPL]")
         self.ax[1].set_xlabel("Time [s]")
         self.ax[1].set_ylabel("dB [SPL]")
+        self.ax[0].set_title('Moving avaraged LAeq')
+        self.ax[1].set_title('Instantaneous LAeq')
         self.ax[0].grid()
         self.ax[1].grid()
         self.fig.canvas.mpl_connect('close_event', on_close)
+        self.fig.canvas.set_window_title('LAeq example') 
 
     def _update(self, i): 
         self.ln1.set_ydata(self.dataHandler.getPlotData(True))
@@ -109,7 +114,6 @@ def on_close(event):
 
 
 if __name__ == "__main__":
-
     streamer = streamHandler()
     fig = FigHandler(leq_10_mov)
     fig.startAnimation()
