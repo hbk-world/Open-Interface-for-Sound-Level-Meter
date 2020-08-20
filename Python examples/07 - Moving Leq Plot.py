@@ -1,6 +1,16 @@
-import asyncio
+import asyncio 
 import socket
 import requests
+import threading
+import sys, traceback
+
+import HelpFunctions.sequence_handler as seq
+from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq 
+
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import numpy as np
+
 # Modules to convert webxi data
 import webxi.webxi_header as webxiHead
 import webxi.webxi_stream as webxiStream
@@ -11,79 +21,97 @@ import HelpFunctions.measurment_handler as meas         # Start/pause/Stop measu
 import HelpFunctions.sequence_handler as seq            # Get sequences, e.g. LAeq functions
 from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq # Class to hold moving Leq 
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
-import matplotlib.pyplot as plt
-from drawnow import * 
-import numpy as np
 
-# Setup device 
-ip = "169.254.3.40"
+ip = "169.254.60.175"
 host = "http://" + ip
-socket.gethostbyname(socket.gethostname())
+sequenceID = 6
 
-# Setup streaming info 
-"""Sequence 6 is logging LAeq, but this is not guaranteed. """
-sequenceId = 6
+leq_10_mov = MovingLeq(10, storedata=True)
 
-plt.ion()
+class streamHandler:
+    def __init__(self, startStream = False):
+        self.streamInit()
+        if startStream:
+            self.startStream()
+        print("streamHandler")
 
+    def print_LAeq_mov(self, message, data_type, leq_mov):
+        """This is the function handling the data from the BK2245\n
+        This function prints the data to the terminal in the format:\n
+        "LAeq: Inst_Val | LAeq,mov,10s: AVG_Val"""
+        package = webxiStream.WebxiStream.from_bytes(message)
+        if package.header.message_type == webxiStream.WebxiStream.Header.EMessageType.e_sequence_data:
+            value = package.content.sequence_blocks[0].values
+            # Convert data from binary stream data to Int format
+            LAeq_value = stream.data_type_conv(data_type, value, None) / 100 
+            LAeq_mov_value = leq_mov.move(LAeq_value)
+            print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s: " + "%.1f" % LAeq_mov_value)
+            
+        if not self.StreamRun:
+            loop = asyncio.get_event_loop()
+            loop.stop()
 
-def makeFig(data):
-    axis = np.arange(-100,1,1)
-    plt.plot(axis,data.getPlotData(True), label='Leq Avg')
-    plt.plot(axis,data.getPlotData(False), label='Leq Inst')
-    plt.legend()
-    plt.grid()
-    plt.xlim((-100,0))
-    plt.ylim((30, 100))
-    plt.xlabel("Time [s]")
-    plt.ylabel("dB [SPL]")
+    def streamInit(self):
+        SLM_Setup_LAeq(host)
+        self.ID, self.sequence = seq.get_sequence(host, sequenceID)
+        # Get datatype of the logging data 
+        self.data_type = self.sequence["DataType"]  
 
-async def plotter(data):
-    while True:
-        drawnow(makeFig,data=data)
-        await asyncio.sleep(1)
+        # Get URI for stream
+        self.uri = stream.setup_stream(host,ip,self.ID,"Test")  
 
-def print_LAeq_mov(message, data_type, leq_mov):
-    """This is the function handling the data from the BK2245\n
-       This function prints the data to the terminal in the format:\n
-       "LAeq: Inst_Val | LAeq,mov,10s: AVG_Val"""
-    package = webxiStream.WebxiStream.from_bytes(message)
-    if package.header.message_type == webxiStream.WebxiStream.Header.EMessageType.e_sequence_data:
-        value = package.content.sequence_blocks[0].values
-        # Convert data from binary stream data to Int format
-        LAeq_value = stream.data_type_conv(data_type, value, None) / 100 
-        LAeq_mov_value = leq_mov.move(LAeq_value)
-        print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s:" + "%.1f" % LAeq_mov_value)
+        # Start a measurement. This is needed to obtain data from the device
+        meas.start_pause_measurement(host,True)
 
-async def main():
-    # Setup the SLM to run LAeq 
-    SLM_Setup_LAeq(host)
+        # Create lambda function to use for the stream message. In this example is a function
+        # call used
+        self.msg_func = lambda msg : self.print_LAeq_mov(msg, self.data_type, leq_10_mov)        
 
-    # Get ID and object of sequence, the data for the wanted logging mode
-    ID, sequence = seq.get_sequence(host,sequenceId) 
+    def startStream(self):
+        self.StreamRun = True
+        asyncio.run(self.runStream())
+        loop = asyncio.get_event_loop()
+        loop.close()
 
-    # Get URI for stream
-    uri = stream.setup_stream(host,ip,ID,"Test")   
+    async def runStream(self):
+        # Initilize and run the websocket to retrive data
+        await webSocket.next_async_websocket(self.uri, self.msg_func)  
 
-    # Get datatype of the logging data 
-    data_type = sequence["DataType"]  
+    def stopStream(self):
+        self.StreamRun = False  
 
-    # Start a measurement. This is needed to obtain data from the device
-    meas.start_pause_measurement(host,True)
+class FigHandler:  
+   
+    def __init__(self, dataHandler):
+        self.fig, self.ax = plt.subplots(2,1,sharex=True, sharey=True)
+        axis = np.arange(-100,1,1)
+        self.dataHandler = dataHandler
+        self.ln1, = self.ax[0].plot(axis,dataHandler.getPlotData(True))
+        self.ln2, = self.ax[1].plot(axis,dataHandler.getPlotData(False))
+        self.ax[1].set_xlim(left=np.min(axis), right=np.max(axis))
+        self.ax[1].set_ylim(bottom=30, top=100)
+        self.ax[1].set_xlabel("Time [s]")
+        self.ax[1].set_ylabel("dB [SPL]")
+        self.ax[0].grid()
+        self.ax[1].grid()
+        self.fig.canvas.mpl_connect('close_event', on_close)
 
-    # Initilize a MovingLeq object to handle the data. 
-    # This example uses a 10s moving leq (assuming 1s logging)
-    leq_10_mov = MovingLeq(10,storedata=True)
+    def _update(self, i): 
+        self.ln1.set_ydata(self.dataHandler.getPlotData(True))
+        self.ln2.set_ydata(self.dataHandler.getPlotData(False))
 
-    # Create lambda function to use for the stream message. In this example is a function
-    # call used
-    msg_func = lambda msg : print_LAeq_mov(msg, data_type, leq_10_mov)
+    def startAnimation(self):
+        self.ani = FuncAnimation(self.fig, self._update, interval=1000)                     
 
-    task1 = asyncio.create_task(webSocket.next_async_websocket(uri,msg_func))
-    task2 = asyncio.create_task(plotter(leq_10_mov))
+def on_close(event):
+    streamer.stopStream()
+    sys.exit(0)
 
-    await task1
-    await task2
 
 if __name__ == "__main__":
-    asyncio.run(main())
+
+    streamer = streamHandler()
+    fig = FigHandler(leq_10_mov)
+    fig.startAnimation()
+    threading.Thread(target=streamer.startStream).start()        
+    plt.show()
