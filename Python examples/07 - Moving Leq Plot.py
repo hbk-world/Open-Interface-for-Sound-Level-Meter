@@ -59,7 +59,7 @@ class streamHandler:
         self.data_type = self.sequence["DataType"]  
 
         # Get URI for stream
-        self.uri = stream.setup_stream(host,ip,self.ID,"Test")  
+        self.uri = stream.setup_stream(host,ip,self.ID,"LAeqStream")  
 
         # Start a measurement. This is needed to obtain data from the device
         meas.start_pause_measurement(host,True)               
@@ -77,6 +77,9 @@ class streamHandler:
         # Initilize and run the websocket to retrive data
         loop.create_task(webSocket.next_async_websocket(self.uri, self.msg_func))
         await fut
+        streamID = stream.get_stream_ID(host, "LAeqStream")
+        requests.delete(host + "/WebXi/Streams/" + str(streamID)) # Cleaning up and deleting the stream used
+        meas.stop_measurement(host)
 
     def stopStream(self):
         self.StreamRun = False  
@@ -111,7 +114,6 @@ class FigHandler:
 def on_close(event):
     streamer.stopStream()
     sys.exit(0)
-
 
 if __name__ == "__main__":
     streamer = streamHandler()
