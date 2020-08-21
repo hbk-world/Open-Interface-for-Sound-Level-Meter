@@ -77,9 +77,10 @@ class streamHandler:
         # Initilize and run the websocket to retrive data
         loop.create_task(webSocket.next_async_websocket(self.uri, self.msg_func))
         await fut
+        meas.stop_measurement(host)
         streamID = stream.get_stream_ID(host, "LAeqStream")
         requests.delete(host + "/WebXi/Streams/" + str(streamID)) # Cleaning up and deleting the stream used
-        meas.stop_measurement(host)
+        
 
     def stopStream(self):
         self.StreamRun = False  
