@@ -11,6 +11,19 @@ def find_sequence(sequenceId, sequences):
                 if isinstance(subseq, dict):
                     return find_sequence(sequenceId, subseq)
 
+def find_sequence_by_name(sequenceName, sequences):
+    if isinstance(sequences, dict):
+        if "Name" in sequences:
+            return True if sequences["Name"] == sequenceName else False
+        else:
+            for count, subtree in sequences.items():
+                test = find_sequence_by_name(sequenceName, subtree)
+                if isinstance(test, bool) and test:
+                    return int(count)
+                elif isinstance(test, int) and test:
+                    return test
+        
+
 def get_sequence(hostID,ID):
     """This function checks if the ID exists"""
     response = requests.get(hostID + "/webxi/sequences?recursive")

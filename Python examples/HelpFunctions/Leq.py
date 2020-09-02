@@ -21,15 +21,16 @@ class MovingLeq:
        Calling move(new_interval) on the object will overwrite the oldest value in the       
        window, recalculate the total Leq and return it."""
 
-    def __init__(self, window_length_sec,storedata=False):
+    def __init__(self, window_length_sec, storedata=False, windowSize=None):
         self.window_length = window_length_sec
+        windowSize = self.window_length * 10 + 1 if windowSize is None else windowSize
 
         # Intialize an empty array, index to track oldest value, and window status
         self.leq_window = np.zeros(window_length_sec)
         self.storedata = storedata
         if self.storedata:
-            self.rawData = LeqData(101) # Used to store the raw data for plotting
-            self.leqData = LeqData(101) # Used to store the Leq data for plotting
+            self.rawData = LeqData(windowSize) # Used to store the raw data for plotting
+            self.leqData = LeqData(windowSize) # Used to store the Leq data for plotting
         self.oldest_value_index = 0
         self.leq_total = 0.0
         self.window_full = False

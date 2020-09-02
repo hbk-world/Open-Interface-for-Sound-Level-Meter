@@ -1,8 +1,8 @@
 import asyncio 
-import socket
 import requests
 import threading
 import sys, traceback
+import time
 
 import HelpFunctions.sequence_handler as seq
 from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq 
@@ -48,8 +48,6 @@ class streamHandler:
             print("LAeq: " + "%.1f" % LAeq_value + "  |  LAeq,mov,10s: " + "%.1f" % LAeq_mov_value)
             
         if not self.StreamRun:
-            # loop = asyncio.get_event_loop()
-            # loop.stop()
             fut.set_result(True)
 
     def streamInit(self):
@@ -79,8 +77,7 @@ class streamHandler:
         await fut
         meas.stop_measurement(host)
         streamID = stream.get_stream_ID(host, "LAeqStream")
-        requests.delete(host + "/WebXi/Streams/" + str(streamID)) # Cleaning up and deleting the stream used
-        
+        requests.delete(host + "/WebXi/Streams/" + str(streamID)) # Cleaning up and deleting the stream used        
 
     def stopStream(self):
         self.StreamRun = False  
@@ -89,7 +86,7 @@ class FigHandler:
    
     def __init__(self, dataHandler):
         self.fig, self.ax = plt.subplots(2,1,sharex=True, sharey=True)
-        axis = np.arange(-100,1,1)
+        axis = np.arange(-(len(dataHandler.getPlotData(True)) - 1),1,1)
         self.dataHandler = dataHandler
         self.ln1, = self.ax[0].plot(axis,dataHandler.getPlotData(True))
         self.ln2, = self.ax[1].plot(axis,dataHandler.getPlotData(False))
@@ -110,7 +107,7 @@ class FigHandler:
         self.ln2.set_ydata(self.dataHandler.getPlotData(False))
 
     def startAnimation(self):
-        self.ani = FuncAnimation(self.fig, self._update, interval=1000)                     
+        self.ani = FuncAnimation(self.fig, self._update, interval=1)                     
 
 def on_close(event):
     streamer.stopStream()
