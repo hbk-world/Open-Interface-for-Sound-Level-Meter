@@ -3,13 +3,16 @@ from requests.auth import HTTPDigestAuth
 
 def find_sequence(sequenceId, sequences):
     """Iterations through the different sequences on the device to find the wanted one"""
+    res = None
     if isinstance(sequences, dict):
         if str(sequenceId) in sequences:
             return sequences[str(sequenceId)]
         else:
             for _, subseq in sequences.items():
                 if isinstance(subseq, dict):
-                    return find_sequence(sequenceId, subseq)
+                    res = find_sequence(sequenceId, subseq)
+                if res is not None:
+                    return res
 
 def find_sequence_by_name(sequenceName, sequences):
     if isinstance(sequences, dict):

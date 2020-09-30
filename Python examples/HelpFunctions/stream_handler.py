@@ -38,3 +38,5 @@ def data_type_conv(data_type, value, vector_length):
                 value_array.append(int.from_bytes(value[i:i+2], "little", signed=True))
             # print(len(value_array))
             return value_array
+    elif data_type == "BKTimeSpan":
+        return int.from_bytes(value[-4:], "little", signed=True)

@@ -27,6 +27,7 @@ class MovingLeq:
 
         # Intialize an empty array, index to track oldest value, and window status
         self.leq_window = np.zeros(window_length_sec)
+        self.leq_window.fill(np.nan)
         self.storedata = storedata
         if self.storedata:
             self.rawData = LeqData(windowSize) # Used to store the raw data for plotting
@@ -77,6 +78,7 @@ class MovingLeq:
 class LeqData:
     def __init__(self,window_length_sec):
         self.leq_window = np.zeros(window_length_sec)
+        self.leq_window[:] = np.nan
 
     def move(self, new_value):
         self.leq_window = np.insert(self.leq_window[1:], self.leq_window.size-1,new_value)
