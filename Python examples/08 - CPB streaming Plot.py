@@ -16,7 +16,7 @@ import HelpFunctions.stream_handler as stream           # SLM stream functions
 import HelpFunctions.measurment_handler as meas         # Start/pause/Stop measurments functions
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
 
-ip = "192.168.0.111"
+ip = "192.168.0.40"
 host = "http://" + ip
 sequenceID = 35
 
@@ -39,8 +39,6 @@ class CPB_SLM:
         bb = lambda x : np.round(x * 2) / 2 if  x < 70 else bb(x / 10) * 10
         octaves = 10**(0.1*octaveRange)
         return [bb(i) for i in octaves]
-
-
 
 def getSequenceID(host, SqeuenceName):
     sequences = requests.get(host + "/webxi/sequences?recursive").json()
@@ -83,7 +81,7 @@ class FigureHandler:
     
     def __init__(self, dataHandler):
         self.dataHandler = dataHandler
-        self.fig, self.ax = plt.subplots(1,1)
+        self.fig, self.ax = plt.subplots(1,1, figsize=(10,5))
         self.CPBFreq = dataHandler.calcFreqBands()
         self.freq = [(i.replace("000.0","k")).replace(".0", "") for i in [str(i) for i in self.CPBFreq]]
         self.ln = self.ax.bar(self.freq, np.zeros(len(self.freq)), width=.99)
@@ -91,14 +89,17 @@ class FigureHandler:
         self.ax.grid(axis='y')
         self.ax.set_ylabel("dB [SPL]")
         self.ax.set_xlabel("Frequency band [Hz]")
+        self.fig.autofmt_xdate()
+        self.fig.tight_layout()
         self.fig.canvas.mpl_connect('close_event', on_close)
 
     def _update(self, i): 
-        for rect, x in zip(self.ln, self.dataHandler.CPB_values):
-            rect.set_height(x)
+        for bar in self.ax.containers:
+            bar.remove()
+        self.ax.bar(self.freq, self.dataHandler.CPB_values, width=.99, color='#1f77b4')
 
     def startAnimation(self):
-        self.ani = FuncAnimation(self.fig, self._update, interval=10) 
+        self.ani = FuncAnimation(self.fig, self._update, interval=1000) 
 
 def on_close(event):
     stream_handler.stopStream()

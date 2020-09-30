@@ -19,14 +19,11 @@ import HelpFunctions.measurment_handler as meas         # Start/pause/Stop measu
 from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq # Class to hold moving Leq 
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
 
-ip = "192.168.0.111"
+ip = "192.168.0.40"
 host = "http://" + ip
 
 # This example will stream 2 sequences, LAeq and LCeq. If more sequences is wanted add to this list
-sequenceNames = ["LAeq", "LZeq"]
-############ Remove ################
-last_time = {0: time.time()}
-####################################
+sequenceNames = ["LAeq", "LApeak"]
 
 def getSequenceID(host, SqeuenceName):
     sequences = requests.get(host + "/webxi/sequences?recursive").json()
@@ -48,7 +45,7 @@ class streamHandler:
             ID, sequence = seq.get_sequence(host, getSequenceID(host, x))
             self.IDs.append(ID)
             self.sequences.append(sequence)
-            self.sequenceFuncs.append(MovingLeq(10, storedata=True))
+            self.sequenceFuncs.append(MovingLeq(10, storedata=True, windowSize=100))
 
         self.uri = stream.setup_stream(host, ip, self.IDs, "MultipleSequences")
         # Start a measurement. This is needed to obtain data from the device
@@ -97,30 +94,28 @@ class FigHandler:
         self.dataHandler = dataHandler if isinstance(dataHandler, list) else [dataHandler]
         self.ln1 = []
         self.ln2 = []
-        for x in self.dataHandler:
-            self.ln1.append((self.ax[0].plot(axis,x.getPlotData(True)))[0])
+        for x, ii in zip(self.dataHandler, sequenceNames):
+            self.ln1.append((self.ax[0].plot(axis,x.getPlotData(True), label=ii))[0])
             self.ln2.append((self.ax[1].plot(axis,x.getPlotData(False)))[0])
         self.ax[1].set_xlim(left=np.min(axis), right=np.max(axis))
         self.ax[1].set_ylim(bottom=30, top=100)
         self.ax[0].set_ylabel("dB [SPL]")
         self.ax[1].set_xlabel("Time [s]")
         self.ax[1].set_ylabel("dB [SPL]")
-        self.ax[0].set_title('Moving avaraged LAeq')
-        self.ax[1].set_title('Instantaneous LAeq')
+        self.ax[0].set_title('Moving avaraged')
+        self.ax[1].set_title('Instantaneous')
+        leg = self.ax[0].legend(loc='upper left')
         self.ax[0].grid()
         self.ax[1].grid()
+        self.fig.autofmt_xdate()
+        self.fig.tight_layout()
         self.fig.canvas.mpl_connect('close_event', on_close)
         self.fig.canvas.set_window_title('LAeq example') 
-        self.text = self.ax[0].text(0.97,0.97, "", transform=self.ax[0].transAxes, ha="right", va="top")
 
     def _update(self, i): 
         for idx, x in enumerate(self.dataHandler):
             self.ln1[idx].set_ydata(x.getPlotData(True))
             self.ln2[idx].set_ydata(x.getPlotData(False))
-            
-        new_time = time.time()
-        self.text.set_text("{0:.2f} fps".format(1./(new_time-last_time[0])))
-        last_time.update({0:new_time})
 
     def startAnimation(self):
         self.ani = FuncAnimation(self.fig, self._update, interval=1000)                     

@@ -22,18 +22,18 @@ import HelpFunctions.sequence_handler as seq            # Get sequences, e.g. LA
 from HelpFunctions.Leq import MovingLeq, SLM_Setup_LAeq # Class to hold moving Leq 
 import HelpFunctions.websocket_handler as webSocket     # Async functions to control communication
 
-ip = "169.254.3.40"
+ip = "192.168.0.40"
 host = "http://" + ip
 sequenceID = 6
 
 leq_10_mov = MovingLeq(10, storedata=True)
 
 class streamHandler:
+
     def __init__(self, startStream = False):
         self.streamInit()
         if startStream:
             self.startStream()
-        print("streamHandler")
 
     def print_LAeq_mov(self, message, data_type, leq_mov, fut):
         """This is the function handling the data from the BK2245\n
@@ -85,7 +85,8 @@ class streamHandler:
 class FigHandler:  
    
     def __init__(self, dataHandler):
-        self.fig, self.ax = plt.subplots(2,1,sharex=True, sharey=True)
+        self.fig = plt.figure()
+        self.ax = self.fig.subplots(2,1,sharex=True, sharey=True)
         axis = np.arange(-(len(dataHandler.getPlotData(True)) - 1),1,1)
         self.dataHandler = dataHandler
         self.ln1, = self.ax[0].plot(axis,dataHandler.getPlotData(True))
@@ -107,7 +108,7 @@ class FigHandler:
         self.ln2.set_ydata(self.dataHandler.getPlotData(False))
 
     def startAnimation(self):
-        self.ani = FuncAnimation(self.fig, self._update, interval=1)                     
+        self.ani = FuncAnimation(self.fig, self._update, interval=1000)                     
 
 def on_close(event):
     streamer.stopStream()
@@ -119,3 +120,4 @@ if __name__ == "__main__":
     fig.startAnimation()
     threading.Thread(target=streamer.startStream).start()        
     plt.show()
+    
