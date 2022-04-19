@@ -1,4 +1,4 @@
-![2245/2255 Sound Level Meters](22452255.jpg)
+![2245/2255 Sound Level Meters](22452255small.jpg)
 
 # Open-Interface-for-Sound-Level-Meter
 #### *Documentation and programming examples*
