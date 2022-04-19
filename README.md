@@ -1,9 +1,9 @@
-![2245 Sound Level Meter](2245.jpg)
+![2245/2255 Sound Level Meters](22452255.jpg)
 
 # Open-Interface-for-Sound-Level-Meter
 #### *Documentation and programming examples*
 
-This repository contains documentation and examples, how to control the B&K2245 sound level meter (SLM) via the WebXi interface. The SLM is developed and designed by Hottinger Brüel & Kjær (https://hbkworld.com).
+This repository contains documentation and examples, how to control the B&K2245 and the HBK2255 sound level meter (SLM) via the WebXi interface. The SLM is developed and designed by Hottinger Brüel & Kjær (https://hbkworld.com).
 
 The SLM has two main network interfaces supporting the HTTP based WebXi protocol: Wired (USB/Ethernet) and Wi-Fi.
 
