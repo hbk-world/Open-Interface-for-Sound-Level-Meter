@@ -43,9 +43,8 @@ class timeStamps:
         return self.__startTime
     @StartTime.setter
     def StartTime(self, Value):
-        if self.__startTime is None:
-            adder = (-1 * (time.timezone))
-            self.__startTime = Value + adder
+        adder = (-1 * (time.timezone))
+        self.__startTime = Value + adder
     @property    
     def lastTime(self):
         return datetime.utcfromtimestamp(self.__timeBuffer[-1]).strftime('%H:%M:%S')
