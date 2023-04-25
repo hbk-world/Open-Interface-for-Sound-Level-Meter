@@ -101,7 +101,7 @@ class FigHandler:
         self.ax[0].grid()
         self.ax[1].grid()
         self.fig.canvas.mpl_connect('close_event', on_close)
-        self.fig.canvas.set_window_title('LAeq example') 
+        self.fig.canvas.manager.set_window_title('LAeq example') 
 
     def _update(self, i): 
         self.ln1.set_ydata(self.dataHandler.getPlotData(True))
